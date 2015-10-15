@@ -13,12 +13,12 @@ import json
 
 def main_loop():
     while True:
-        comment_to_make = json.loads(r.lpop('completed'))
+        comment_to_make = r.lpop('completed')
         if comment_to_make is None:
             print "looping"
             time.sleep(5)
         else:
-            comment(comment_to_make)
+            comment(json.loads(comment_to_make))
 
 
 def comment(comment_to_make):
@@ -26,7 +26,7 @@ def comment(comment_to_make):
     ts = comment_to_make['ts']
     nodeset = comment_to_make['nodeset']
     success = comment_to_make['success']
-    print "Considering: {0}".format(comment_to_make)
+    print "Considering: {0}".format(comment_to_make['log_path'])
     print "org: {0}, project: {1}, pr {2}".format(org, project, pr)
 
     if project not in config.commentable:
@@ -48,7 +48,7 @@ def comment(comment_to_make):
         status = 'failure'
     commit.create_status(status,
                          target_url="{0}{1}".format(config.rooturl,
-                                                    comment_to_make),
+                                                    comment_to_make['log_path']),
                          description="PCCI Voting System",
                          context="continuous-integration/pcci-{0}".format(nodeset))
 
